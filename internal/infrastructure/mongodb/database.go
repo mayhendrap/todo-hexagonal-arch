@@ -12,7 +12,6 @@ import (
 type MongoDB struct {
 	client *mongo.Client
 	db     *mongo.Database
-	ctx    context.Context
 }
 
 func NewMongoDBAdapter(databaseName, dataSourceName string) *MongoDB {
@@ -33,7 +32,10 @@ func NewMongoDBAdapter(databaseName, dataSourceName string) *MongoDB {
 }
 
 func (a *MongoDB) CloseDBConnection() {
-	err := a.client.Disconnect(a.ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := a.client.Disconnect(ctx)
 	if err != nil {
 		log.Fatalf("[x] fail to disconnect mongodb: %v", err)
 	}

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"todo-hexagonal-arch/internal/application/http/dto"
-	"todo-hexagonal-arch/internal/core/domain"
 	"todo-hexagonal-arch/internal/core/interfaces"
 )
 
@@ -43,10 +42,8 @@ func (tc *todoController) Create(c *gin.Context) {
 		return
 	}
 
-	todo := domain.Todo{
-		Title:   request.Title,
-		Content: request.Content,
-	}
+	userID := c.GetString("x-user-id")
+	todo := dto.ToTodoCreate(request, userID)
 
 	err := tc.todoService.Create(todo)
 	if err != nil {
@@ -54,7 +51,7 @@ func (tc *todoController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, map[string]interface{}{"data": "created"})
+	c.JSON(http.StatusCreated, dto.ToResponse("created", 201, nil))
 }
 
 func (tc *todoController) Update(c *gin.Context) {
@@ -67,20 +64,15 @@ func (tc *todoController) Update(c *gin.Context) {
 	todoID := c.Param("id")
 	userID := c.GetString("x-user-id")
 
-	todo := domain.Todo{
-		ID:      todoID,
-		Title:   request.Title,
-		Content: request.Content,
-		UserID:  userID,
-	}
+	todo := dto.ToTodoUpdate(request, todoID, userID)
 
 	updatedTodo, err := tc.todoService.Update(todo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ToResponse("error", 500, err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{"data": updatedTodo})
+	c.JSON(http.StatusOK, dto.ToResponse("success", 200, updatedTodo))
 }
 
 func (tc *todoController) Delete(c *gin.Context) {

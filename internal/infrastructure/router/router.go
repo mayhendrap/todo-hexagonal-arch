@@ -12,10 +12,12 @@ func Setup(db *mongo.Database, gin *gin.Engine) {
 	publicRouter := gin.Group("")
 	NewAuthRouter(db, domain.UserCollection, publicRouter)
 
+	publicRouter.Static("/swagger-ui", "swagger-ui")
+
 	tokenUtil := utils.NewJwtUtil()
 	authMiddleware := middleware.NewAuthMiddleware(tokenUtil)
 
-	privateRouter := gin.Group("")
+	privateRouter := gin.Group("/v1")
 	privateRouter.Use(authMiddleware.AuthMiddleware())
 	NewTodoRouter(db, domain.TodoCollection, privateRouter)
 }

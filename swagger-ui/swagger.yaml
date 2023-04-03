@@ -1,0 +1,308 @@
+swagger: '2.0'
+
+info:
+    title: Todo List Application
+    description: >-
+        This application purpose is for note your todo.
+    contact:
+        name: Todo List API
+        url: 'https://www.todolistapp.herokuapp.com/'
+        email: mayhendra.p10@gmail.com
+    version: master
+
+host: localhost:8080
+schemes:
+    - http
+
+consumes:
+    - application/json
+produces:
+    - application/json
+
+securityDefinitions:
+    Authorization:
+        type: apiKey
+        in: header
+        name: Authorization
+
+security:
+    - Authorization: []
+
+paths:
+    /login:
+        post:
+            security: []
+            summary: Login
+            tags:
+                - Authentication
+            operationId: auth.login
+            parameters:
+                - name: body
+                  in: body
+                  description: Request body for login
+                  required: true
+                  schema:
+                      $ref: '#/definitions/LoginBody'
+            responses:
+                '200':
+                    $ref: '#/responses/AuthResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+    /register:
+        post:
+            security: []
+            summary: Register
+            tags:
+                - Authentication
+            operationId: auth.register
+            parameters:
+                - name: body
+                  in: body
+                  description: Request body for register
+                  required: true
+                  schema:
+                      $ref: '#/definitions/RegisterBody'
+            responses:
+                '200':
+                    $ref: '#/responses/AuthResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+    /v1/todos/{id}:
+        parameters:
+            - $ref: '#/parameters/TodoID'
+        get:
+            summary: Get todo
+            tags:
+                - Todo
+            operationId: todo.FindOne
+            responses:
+                '200':
+                    $ref: '#/responses/TodoFindOneResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+        patch:
+            summary: Update todo
+            tags:
+                - Todo
+            operationId: todo.Update
+            parameters:
+                - name: body
+                  in: body
+                  description: Request body for create todo
+                  required: true
+                  schema:
+                      $ref: '#/definitions/TodoBody'
+            responses:
+                '200':
+                    $ref: '#/responses/TodoUpdateResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+        delete:
+            summary: Delete todo
+            tags:
+                - Todo
+            operationId: todo.Delete
+            responses:
+                '200':
+                    $ref: '#/responses/TodoDeleteResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+    /v1/todos:
+        post:
+            summary: Create todo
+            tags:
+                - Todo
+            operationId: todo.Create
+            parameters:
+                - name: body
+                  in: body
+                  description: Request body for create todo
+                  required: true
+                  schema:
+                      $ref: '#/definitions/TodoBody'
+            responses:
+                '200':
+                    $ref: '#/responses/TodoCreateResponse'
+                '401':
+                    $ref: '#/responses/ErrorUnauthorized'
+                '412':
+                    $ref: '#/responses/ErrorPreconditionFailed'
+                default:
+                    $ref: '#/responses/ErrorUnexpected'
+
+parameters:
+    TodoID:
+        name: id
+        in: path
+        description: todo identifier
+        required: true
+        type: string
+
+responses:
+    AuthResponse:
+        description: Authentication response
+        schema:
+            $ref: '#/definitions/Auth'
+    TodoFindOneResponse:
+        description: Todo Find One Response
+        schema:
+            $ref: '#/definitions/TodoSingleResult'
+    TodoCreateResponse:
+        description: Todo Create Response
+        schema:
+            $ref: '#/definitions/TodoSingleResult'
+    TodoUpdateResponse:
+        description: Todo Update Response
+        schema:
+            $ref: '#/definitions/TodoSingleResult'
+    TodoDeleteResponse:
+        description: Todo Delete Response
+        schema:
+            $ref: '#/definitions/Base'
+    ErrorBadRequest:
+        description: Bad Request
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorUnauthorized:
+        description: Unauthorized
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorNotFound:
+        description: Not Found
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorConflict:
+        description: Conflict
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorGone:
+        description: Gone
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorPreconditionFailed:
+        description: Precondition Failed
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorUnprocessableEntity:
+        description: Unprocessable Entity
+        schema:
+            $ref: '#/definitions/Error'
+    ErrorUnexpected:
+        description: Unexpected
+        schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+    Base:
+        type: object
+        properties:
+            message:
+                type: string
+            status:
+                type: integer
+            data:
+                type: object
+    Auth:
+        type: object
+        properties:
+            message:
+                type: string
+            status:
+                type: integer
+            data:
+                type: object
+                required:
+                    - token
+                properties:
+                    token:
+                        type: string
+    TodoSingleResult:
+        type: object
+        properties:
+            message:
+                type: string
+            status:
+                type: integer
+            data:
+                type: object
+                required:
+                    - id
+                    - title
+                    - content
+                    - userId
+                properties:
+                    id:
+                        type: string
+                    title:
+                        type: string
+                    content:
+                        type: string
+                    userId:
+                        type: string
+    TodoBody:
+        type: object
+        required:
+            - title
+            - content
+        properties:
+            title:
+                type: string
+            content:
+                type: string
+    LoginBody:
+        type: object
+        required:
+            - email
+            - password
+        properties:
+            email:
+                type: string
+            password:
+                type: string
+    RegisterBody:
+        type: object
+        required:
+            - firstName
+            - lastName
+            - email
+            - password
+        properties:
+            firstName:
+                type: string
+            lastName:
+                type: string
+            email:
+                type: string
+            password:
+                type: string
+    Error:
+        type: object
+        properties:
+            error:
+                type: string
+            description:
+                type: string
+            instance_usable:
+                type: boolean
+            update_repeatable:
+                type: boolean
